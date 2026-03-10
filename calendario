@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendário TJPR 2026</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      font-family: Arial, sans-serif;
+      color: #111;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .wrapper {
+      width: 100%;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .calendar-box {
+      width: 100%;
+      max-width: 390px;
+      background: #fff;
+      border: 1px solid #dcdcdc;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    #calendari {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: 338px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    table {
+      border-collapse: collapse;
+      table-layout: fixed;
+      width: 100%;
+      background: #fff;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: translateX(0);
+      transition: transform 0.22s ease;
+    }
+
+    table.actiu {
+      transform: translateX(0);
+    }
+
+    table.inactiu {
+      transition: transform 0.22s ease;
+    }
+
+    table.amagat-esquerra {
+      transform: translateX(-100%);
+    }
+
+    table.amagat-dreta {
+      transform: translateX(100%);
+    }
+
+    th,
+    td {
+      text-align: center;
+      padding: 0;
+    }
+
+    tr:first-child th {
+      background: #000;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      border: none;
+      padding: 14px 44px;
+      position: relative;
+    }
+
+    th .ano {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.82);
+      margin-top: 3px;
+    }
+
+    tr:nth-child(2) th {
+      background: #000;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 8px 2px;
+      border-top: 1px solid #1f1f1f;
+      border-right: 1px solid #1f1f1f;
+    }
+
+    tr:nth-child(2) th:last-child {
+      border-right: none;
+    }
+
+    td {
+      height: 40px;
+      border-right: 1px solid #f0f0f0;
+      border-bottom: 1px solid #f0f0f0;
+      background: #fff;
+      position: relative;
+    }
+
+    td:last-child {
+      border-right: none;
+    }
+
+    td > span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      color: #333;
+      border: 2px solid transparent;
+      font-size: 13px;
+      transition: background 0.15s ease, color 0.15s ease, border 0.15s ease;
+    }
+
+    td.fora > span {
+      opacity: 0.22;
+    }
+
+    td.hoje > span {
+      border: 2px solid #000;
+      font-weight: 700;
+    }
+
+    td.feriado > span {
+      background: #111;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    td.suspensao > span {
+      background: #7a7a7a;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .boto-next,
+    .boto-prev {
+      position: absolute;
+      top: 11px;
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .boto-prev {
+      left: 10px;
+    }
+
+    .boto-next {
+      right: 10px;
+    }
+
+    .boto-prev:hover,
+    .boto-next:hover {
+      background: rgba(255,255,255,0.24);
+    }
+
+    .legenda {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 12px 14px;
+      border-top: 1px solid #ececec;
+      background: #fafafa;
+      font-size: 12px;
+      color: #222;
+    }
+
+    .legenda-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cor {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid #999;
+      flex: 0 0 14px;
+    }
+
+    .cor-feriado {
+      background: #111;
+      border-color: #111;
+    }
+
+    .cor-suspensao {
+      background: #7a7a7a;
+      border-color: #7a7a7a;
+    }
+
+    .cor-hoje {
+      background: #fff;
+      border: 2px solid #000;
+    }
+
+    @media (max-width: 420px) {
+      .calendar-box {
+        max-width: 100%;
+        border-radius: 10px;
+      }
+
+      #calendari {
+        height: 320px;
+      }
+
+      td,
+      td > span {
+        height: 37px;
+      }
+
+      tr:first-child th {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="calendar-box">
+      <div id="calendari"></div>
+
+      <div class="legenda">
+        <div class="legenda-item">
+          <span class="cor cor-feriado"></span>
+          <span>Feriado</span>
+        </div>
+        <div class="legenda-item">
+          <span class="cor cor-suspensao"></span>
+          <span>Suspensão</span>
+        </div>
+        <div class="legenda-item">
+          <span class="cor cor-hoje"></span>
+          <span>Hoje</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const meses = [
+      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+
+    const diasAbr = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+    const eventosTJPR2026 = {
+      "2026-01-01": { tipo: "feriado", descricao: "Confraternização Universal" },
+      "2026-02-16": { tipo: "suspensao", descricao: "Suspensão do expediente - véspera de Carnaval" },
+      "2026-02-17": { tipo: "feriado", descricao: "Carnaval" },
+      "2026-04-02": { tipo: "suspensao", descricao: "Suspensão do expediente - Quinta-feira Santa" },
+      "2026-04-03": { tipo: "feriado", descricao: "Paixão de Cristo" },
+      "2026-04-20": { tipo: "suspensao", descricao: "Suspensão do expediente" },
+      "2026-04-21": { tipo: "feriado", descricao: "Tiradentes" },
+      "2026-05-01": { tipo: "feriado", descricao: "Dia do Trabalho" },
+      "2026-06-04": { tipo: "feriado", descricao: "Corpus Christi" },
+      "2026-06-05": { tipo: "suspensao", descricao: "Suspensão do expediente" },
+      "2026-09-07": { tipo: "feriado", descricao: "Independência do Brasil" },
+      "2026-09-08": { tipo: "feriado", descricao: "Padroeira de Curitiba (somente em Curitiba)" },
+      "2026-10-12": { tipo: "feriado", descricao: "Nossa Senhora Aparecida" },
+      "2026-10-30": { tipo: "feriado", descricao: "Dia do Funcionário Público (transferido)" },
+      "2026-11-02": { tipo: "feriado", descricao: "Finados" },
+      "2026-11-15": { tipo: "feriado", descricao: "Proclamação da República" },
+      "2026-11-20": { tipo: "feriado", descricao: "Dia Nacional de Zumbi e da Consciência Negra" },
+      "2026-12-18": { tipo: "feriado", descricao: "Dia da Justiça (transferido)" },
+      "2026-12-24": { tipo: "suspensao", descricao: "Suspensão do expediente - Véspera de Natal" },
+      "2026-12-25": { tipo: "feriado", descricao: "Natal" },
+      "2026-12-31": { tipo: "suspensao", descricao: "Suspensão do expediente - Véspera de Ano Novo" }
+    };
+
+    Number.prototype.pad = function(num) {
+      return String(this).padStart(num, "0");
+    };
+
+    function formatarData(data) {
+      const ano = data.getFullYear();
+      const mes = String(data.getMonth() + 1).padStart(2, "0");
+      const dia = String(data.getDate()).padStart(2, "0");
+      return `${ano}-${mes}-${dia}`;
+    }
+
+    function calendari(widget, data) {
+      let original = widget.getElementsByClassName("actiu")[0];
+
+      if (typeof original === "undefined") {
+        original = document.createElement("table");
+        original.setAttribute(
+          "data-actual",
+          `${data.getFullYear()}/${data.getMonth().pad(2)}/${data.getDate().pad(2)}`
+        );
+        widget.appendChild(original);
+      }
+
+      const dataOriginal = new Date(original.getAttribute("data-actual"));
+      const diff =
+        (data.getFullYear() - dataOriginal.getFullYear()) * 12 +
+        (data.getMonth() - dataOriginal.getMonth());
+
+      const tabela = document.createElement("table");
+      tabela.className = diff <= 0 ? "amagat-esquerra" : "amagat-dreta";
+      widget.appendChild(tabela);
+
+      tabela.setAttribute(
+        "data-actual",
+        `${data.getFullYear()}/${data.getMonth().pad(2)}/${data.getDate().pad(2)}`
+      );
+
+      let linha = document.createElement("tr");
+      const titulo = document.createElement("th");
+      titulo.setAttribute("colspan", 7);
+
+      const botaoPrev = document.createElement("button");
+      botaoPrev.className = "boto-prev";
+      botaoPrev.innerHTML = "&#9666;";
+
+      const botaoNext = document.createElement("button");
+      botaoNext.className = "boto-next";
+      botaoNext.innerHTML = "&#9656;";
+
+      const tituloTexto = document.createElement("span");
+      tituloTexto.innerHTML = `${meses[data.getMonth()]}<span class="ano">${data.getFullYear()}</span>`;
+
+      titulo.appendChild(botaoPrev);
+      titulo.appendChild(tituloTexto);
+      titulo.appendChild(botaoNext);
+      linha.appendChild(titulo);
+      tabela.appendChild(linha);
+
+      botaoPrev.onclick = function() {
+        calendari(widget, new Date(data.getFullYear(), data.getMonth() - 1, 1));
+      };
+
+      botaoNext.onclick = function() {
+        calendari(widget, new Date(data.getFullYear(), data.getMonth() + 1, 1));
+      };
+
+      linha = document.createElement("tr");
+      for (let i = 0; i < 7; i++) {
+        linha.innerHTML += `<th>${diasAbr[i]}</th>`;
+      }
+      tabela.appendChild(linha);
+
+      const primeiroDiaMes = new Date(data.getFullYear(), data.getMonth(), 1);
+      const diaSemanaInicio = primeiroDiaMes.getDay();
+      const atual = new Date(data.getFullYear(), data.getMonth(), 1 - diaSemanaInicio);
+      const hoje = new Date();
+
+      for (let s = 0; s < 6; s++) {
+        linha = document.createElement("tr");
+
+        for (let d = 0; d < 7; d++) {
+          const cela = document.createElement("td");
+          const span = document.createElement("span");
+          const dataCelula = new Date(atual);
+
+          span.textContent = dataCelula.getDate();
+          cela.appendChild(span);
+
+          if (dataCelula.getMonth() !== data.getMonth()) {
+            cela.classList.add("fora");
+          }
+
+          if (
+            dataCelula.getDate() === hoje.getDate() &&
+            dataCelula.getMonth() === hoje.getMonth() &&
+            dataCelula.getFullYear() === hoje.getFullYear()
+          ) {
+            cela.classList.add("hoje");
+          }
+
+          const chave = formatarData(dataCelula);
+          if (eventosTJPR2026[chave]) {
+            cela.classList.add(eventosTJPR2026[chave].tipo);
+            cela.title = eventosTJPR2026[chave].descricao;
+          }
+
+          atual.setDate(atual.getDate() + 1);
+          linha.appendChild(cela);
+        }
+
+        tabela.appendChild(linha);
+      }
+
+      setTimeout(() => {
+        tabela.className = "actiu";
+        original.className += diff <= 0 ? " amagat-dreta" : " amagat-esquerra";
+      }, 20);
+
+      original.className = "inactiu";
+
+      setTimeout(() => {
+        const inativos = widget.getElementsByClassName("inactiu");
+        while (inativos.length > 0) {
+          widget.removeChild(inativos[0]);
+        }
+      }, 260);
+    }
+
+    const hoje = new Date();
+    const anoInicial = 2026;
+    const mesInicial = hoje.getFullYear() === 2026 ? hoje.getMonth() : 0;
+
+    calendari(document.getElementById("calendari"), new Date(anoInicial, mesInicial, 1));
+  </script>
+</body>
+</html>
